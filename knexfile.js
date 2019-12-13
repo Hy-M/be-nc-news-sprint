@@ -1,4 +1,8 @@
 const ENV = process.env.NODE_ENV || 'development';
+const {
+  username,
+  password
+} = require("./db/credentials.js");
 
 const baseConfig = {
   client: 'pg',
@@ -13,18 +17,21 @@ const baseConfig = {
 const customConfig = {
   development: {
     connection: {
-      database: 'nc_news'
-      // user,
-      // password
+      database: 'nc_news',
+      username: username,
+      password: password
     }
   },
   test: {
     connection: {
-      database: 'nc_news_test'
-      // user,
-      // password
+      database: 'nc_news_test',
+      username: username,
+      password: password
     }
   }
 };
 
-module.exports = { ...customConfig[ENV], ...baseConfig };
+module.exports = {
+  ...customConfig[ENV],
+  ...baseConfig
+};
