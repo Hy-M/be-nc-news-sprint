@@ -50,4 +50,34 @@ describe('/api', () => {
             });
         });
     });
+    describe('/users', () => {
+        describe('/:username', () => {
+            it('status: 200 returns an array of user objects with keys of username, avatar_url and name', () => {
+                return request(app)
+                    .get('/api/users/butter_bridge')
+                    .expect(200)
+                    .then(({
+                        body
+                    }) => {
+                        expect(body[0]).to.contain.keys('username', 'avatar_url', 'name');
+                    })
+            });
+            it('status: 404 returns Path not found when given a non-existant username', () => {
+                return request(app)
+                .get('/api/users/humayraa')
+                .expect(404)
+                .then(({body:{msg}}) => {
+                    expect(msg).to.equal("Path not found");
+                })
+            });
+            it('status: 400 returns Bad request when given an invalid username', () => {
+                return request(app)
+                .get('/api/users/20')
+                .expect(400)
+                .then(({body:{msg}}) => {
+                    expect(msg).to.equal("Bad request");
+                })
+            });
+        });
+    });
 });
