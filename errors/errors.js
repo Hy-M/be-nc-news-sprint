@@ -1,5 +1,4 @@
 // error controller functions
-
 exports.handle405 = (req, res, next) => {
     res.status(405).send({
         msg: "Method not allowed"
