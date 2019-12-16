@@ -64,19 +64,43 @@ describe('/api', () => {
             });
             it('status: 404 returns Path not found when given a non-existant username', () => {
                 return request(app)
-                .get('/api/users/humayraa')
-                .expect(404)
-                .then(({body:{msg}}) => {
-                    expect(msg).to.equal("Path not found");
-                })
+                    .get('/api/users/humayraa')
+                    .expect(404)
+                    .then(({
+                        body: {
+                            msg
+                        }
+                    }) => {
+                        expect(msg).to.equal("Path not found");
+                    })
             });
             it('status: 400 returns Bad request when given an invalid username', () => {
                 return request(app)
-                .get('/api/users/20')
-                .expect(400)
-                .then(({body:{msg}}) => {
-                    expect(msg).to.equal("Bad request");
-                })
+                    .get('/api/users/20')
+                    .expect(400)
+                    .then(({
+                        body: {
+                            msg
+                        }
+                    }) => {
+                        expect(msg).to.equal("Bad request");
+                    })
+            });
+            it('status: 405 returns Method not allowed', () => {
+                const invalidMethods = ["put", "patch", "delete"];
+                const methodPromises = invalidMethods.map((method) => {
+                    return request(app)[method]('/api/users/butter_bridge')
+                        .expect(405)
+                        .then(({
+                            body: {
+                                msg
+                            }
+                        }) => {
+                            expect(msg).to.equal("Method not allowed");
+                        })
+                });
+
+                return Promise.all(methodPromises);
             });
         });
     });
