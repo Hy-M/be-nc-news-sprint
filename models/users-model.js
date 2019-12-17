@@ -8,7 +8,6 @@ exports.fetchUserById = (username) => {
     .select("*")
     .from("users")
     .where("username", username)
-    .returning("*")
     .then((user) => {
         if (!user.length) {
             return Promise.reject({status: 404, msg: "Path not found"});
