@@ -4,7 +4,7 @@ exports.getUserById = (req, res, next) => {
     const { username } = req.params;
     fetchUserById(username)
     .then((response) => {
-        res.status(200).send(response);
+        res.status(200).send({user: response});
     })
     .catch(next);
 }
