@@ -8,7 +8,7 @@ exports.getArticleById = (req, res, next) => {
     } = req.params;
     fetchArticleById(article_id)
     .then((response) => {
-       res.status(200).send(response);
+       res.status(200).send({article: response});
     })
-    .catch(next)
+    .catch(next);
 };

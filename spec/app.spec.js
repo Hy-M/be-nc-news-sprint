@@ -23,7 +23,8 @@ describe('/api', () => {
                     .then(({
                         body
                     }) => {
-                        expect(body[0]).to.contain.keys('slug', 'description');
+                        expect(body).to.have.key('topics');
+                        expect(body.topics[0]).to.contain.keys('slug', 'description');
                     })
             });
             it('status: 404 returns Path not found when given an invalid path', () => {
@@ -66,7 +67,8 @@ describe('/api', () => {
                         .then(({
                             body
                         }) => {
-                            expect(body[0]).to.contain.keys('username', 'avatar_url', 'name');
+                            expect(body).to.have.key('user');
+                            expect(body.user[0]).to.contain.keys('username', 'avatar_url', 'name');
                         })
                 });
                 it('status: 404 returns Path not found when given a non-existant username', () => {
@@ -115,17 +117,54 @@ describe('/api', () => {
     describe('/articles', () => {
         describe('/:article_id', () => {
             describe('GET', () => {
-                it.only('status: 200 returns one article object with the comment_count', () => {
+                it('status: 200 returns one article object with the comment_count', () => {
                     return request(app)
                         .get('/api/articles/3')
                         .expect(200)
                         .then(({
                             body
                         }) => {
-                            expect(body[0]).to.contain.keys('author', 'title', 'article_id', 'body', 'topic', 'created_at', 'votes', 'comment_count');
-                            expect(body[0].comment_count).to.equal(0);
-                            expect(body.length).to.equal(1);
+                            expect(body).to.have.key('article');
+                            expect(body.article[0]).to.contain.keys('author', 'title', 'article_id', 'body', 'topic', 'created_at', 'votes', 'comment_count');
+                            expect(body.article[0].comment_count).to.equal(0);
+                            expect(body.article.length).to.equal(1);
                         })
+                });
+                it('status: 404 returns Path not found', () => {
+                    return request(app)
+                        .get('/api/articles/309284')
+                        .expect(404)
+                        .then(({
+                            body: {
+                                msg
+                            }
+                        }) => {
+                            expect(msg).to.equal("Path not found");
+                        })
+                });
+                it('status: 400 returns Bad Request', () => {
+                    return request(app)
+                        .get('/api/articles/three')
+                        .expect(400)
+                        .then(({
+                            body: {
+                                msg
+                            }
+                        }) => {
+                            expect(msg).to.equal('Bad request');
+                        })
+                });
+                it('status: 405 returns Method not allowed', () => {
+                    return request(app)
+                        .delete('/api/articles/3')
+                        .expect(405)
+                        .then(({
+                            body: {
+                                msg
+                            }
+                        }) => {
+                            expect(msg).to.equal("Method not allowed");
+                        });
                 });
             });
         });

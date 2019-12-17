@@ -8,8 +8,15 @@ exports.fetchArticleById = (article_id) => {
         .where('articles.article_id', article_id)
         .leftJoin('comments', 'comments.article_id', 'articles.article_id')
         .groupBy('articles.article_id')
-    .then((article) => {
-        article[0].comment_count = Number(article[0].comment_count);
-        return article;
-    })
+        .then((article) => {
+            if (!article[0]) {
+                return Promise.reject({
+                    status: 404,
+                    msg: "Path not found"
+                })
+            } else {
+                article[0].comment_count = Number(article[0].comment_count);
+                return article;
+            }
+        })
 };
