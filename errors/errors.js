@@ -24,5 +24,6 @@ exports.handle400 = (err, req, res, next) => {
 };
 
 exports.handle500 = (err, req, res, next) => {
+    console.log(err, "< 500 error");
     res.status(500).send("Internal server error...");
 };
