@@ -35,3 +35,15 @@ exports.updateArticleById = (article_id, inc_votes = 0) => {
         else return article;
     })
 }
+
+exports.checkArticleExists = (article_id) => {
+    return knex
+    .select('*')
+    .from('articles')
+    .where('article_id', article_id)
+    .then((article) => {
+        if (!article.length) {
+            return Promise.reject({status: 404, msg: "Path not found"})
+        }
+    })
+}
