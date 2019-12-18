@@ -154,16 +154,19 @@ describe('/api', () => {
                         })
                 });
                 it('status: 405 returns Method not allowed', () => {
-                    return request(app)
-                        .delete('/api/articles/3')
-                        .expect(405)
-                        .then(({
-                            body: {
-                                msg
-                            }
-                        }) => {
-                            expect(msg).to.equal("Method not allowed");
-                        });
+                    const invalidMethods = ['post', 'delete'];
+                    const methodPromises = invalidMethods.map((method) => {
+                        return request(app)[method]('/api/articles/3')
+                            .expect(405)
+                            .then(({
+                                body: {
+                                    msg
+                                }
+                            }) => {
+                                expect(msg).to.equal("Method not allowed");
+                            })
+                    })
+                    return Promise.all(methodPromises);
                 });
             });
             describe('PATCH', () => {
@@ -233,6 +236,74 @@ describe('/api', () => {
                         }) => {
                             expect(body.article.votes).to.equal(1);
                         })
+                });
+            });
+            describe('/comments', () => {
+                describe('POST', () => {
+                    it('status: 201 returns an object of the posted comment', () => {
+                        return request(app)
+                            .post('/api/articles/3/comments')
+                            .send({
+                                username: "lurker",
+                                body: "Cool!"
+                            })
+                            .expect(201)
+                            .then(({
+                                body
+                            }) => {
+                                expect(body).to.have.key('comment');
+                                expect(body.comment).to.contain.keys('author', 'body', 'comment_id', 'article_id', 'votes', 'created_at');
+                                expect(body.comment.author).to.equal('lurker');
+                            })
+                    });
+                    it('status: 404 returns Path not found for a non-existant article_id', () => {
+                        return request(app)
+                            .post('/api/articles/935794/comments')
+                            .send({
+                                username: "lurker",
+                                body: "Cool!"
+                            })
+                            .expect(404)
+                            .then(({
+                                body: {
+                                    msg
+                                }
+                            }) => {
+                                expect(msg).to.equal("Path not found");
+                            })
+                    })
+                    it('status: 404 returns Path not found for a mispelled endpoint', () => {
+                        return request(app)
+                            .post('/api/articles/3/commentz')
+                            .send({
+                                username: "lurker",
+                                body: "Cool!"
+                            })
+                            .expect(404)
+                            .then(({
+                                body: {
+                                    msg
+                                }
+                            }) => {
+                                expect(msg).to.equal("Path not found");
+                            })
+                    })
+                    it('status: 400 returns Bad request when given an invalid article_id', () => {
+                        return request(app)
+                            .post('/api/articles/three/comments')
+                            .send({
+                                username: "lurker",
+                                body: "Cool!"
+                            })
+                            .expect(400)
+                            .then(({
+                                body: {
+                                    msg
+                                }
+                            }) => {
+                                expect(msg).to.equal("Bad request");
+                            })
+                    });
                 });
             });
         });
