@@ -322,6 +322,55 @@ describe('/api', () => {
                             })
                     });
                 });
+                describe('GET', () => {
+                    it('status: 200 returns the comments with default sorting and ordering', () => {
+                        return request(app)
+                        .get('/api/articles/1/comments')
+                        .expect(200)
+                        .then(({body}) => {
+                            expect(body).to.have.key('comments');
+                            expect(body.comments[0]).to.contain.keys('comment_id', 'votes', 'created_at', 'author', 'body');
+
+                            const sortedColumn = body.comments.map((comment) => {
+                                return comment.created_at;
+                            })                      
+                            expect(sortedColumn).to.be.ascending;
+                        })
+                    });
+                    it('status: 200 returns the comments with given sorting and default ordering', () => {
+                        return request(app)
+                        .get('/api/articles/1/comments?sort_by=votes')
+                        .expect(200)
+                        .then(({body}) => {
+                            const sortedColumn = body.comments.map((comment) => {
+                                return comment.votes;
+                            })                      
+                            expect(sortedColumn).to.be.ascending;
+                        })
+                    });
+                    it('status: 200 returns the comments with given sorting and given ordering', () => {
+                        return request(app)
+                        .get('/api/articles/1/comments?sort_by=author&&order_by=desc')
+                        .expect(200)
+                        .then(({body}) => {
+                            const sortedColumn = body.comments.map((comment) => {
+                                return comment.author;
+                            })                   
+                            expect(sortedColumn).to.be.descending;
+                        })
+                    });
+                    it('status: 200 returns the comments with the default sorting and given ordering', () => {
+                        return request(app)
+                        .get('/api/articles/1/comments?order_by=desc')
+                        .expect(200)
+                        .then(({body}) => {
+                            const sortedColumn = body.comments.map((comment) => {
+                                return comment.created_at;
+                            })                   
+                            expect(sortedColumn).to.be.descending;
+                        })
+                    });
+                });
             });
         });
     });
