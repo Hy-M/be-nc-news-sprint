@@ -3,6 +3,7 @@ const app = express();
 const apiRouter = require("./routes/api-router.js");
 const { handle404, handle400, handle500 } = require("./errors/errors");
 
+app.use(express.json())
 
 app.use('/api', apiRouter);
 

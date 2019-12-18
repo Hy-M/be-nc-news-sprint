@@ -4,6 +4,8 @@ exports.handle405 = (req, res, next) => {
         msg: "Method not allowed"
     });
 }
+
+
 // error-handling middleware functions
 exports.handle404 = (err, req, res, next) => {
     if (err.status === 404) {
@@ -14,7 +16,7 @@ exports.handle404 = (err, req, res, next) => {
     next(err);
 };
 
-exports.handle400 = (err, req, res, next) => {    
+exports.handle400 = (err, req, res, next) => {        
     const codes = ['22P02'];
     if (err.status === 400 || codes.includes(err.code)) {
         res.status(400).send({

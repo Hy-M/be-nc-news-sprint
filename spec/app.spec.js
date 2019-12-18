@@ -60,7 +60,7 @@ describe('/api', () => {
     describe('/users', () => {
         describe('/:username', () => {
             describe('GET', () => {
-                it('status: 200 returns an array of user objects with keys of username, avatar_url and name', () => {
+                it('status: 200 returns one user object with keys of username, avatar_url and name', () => {
                     return request(app)
                         .get('/api/users/butter_bridge')
                         .expect(200)
@@ -68,7 +68,7 @@ describe('/api', () => {
                             body
                         }) => {
                             expect(body).to.have.key('user');
-                            expect(body.user[0]).to.contain.keys('username', 'avatar_url', 'name');
+                            expect(body.user).to.contain.keys('username', 'avatar_url', 'name');
                         })
                 });
                 it('status: 404 returns Path not found when given a non-existant username', () => {
@@ -125,9 +125,8 @@ describe('/api', () => {
                             body
                         }) => {
                             expect(body).to.have.key('article');
-                            expect(body.article[0]).to.contain.keys('author', 'title', 'article_id', 'body', 'topic', 'created_at', 'votes', 'comment_count');
-                            expect(body.article[0].comment_count).to.equal(0);
-                            expect(body.article.length).to.equal(1);
+                            expect(body.article).to.contain.keys('author', 'title', 'article_id', 'body', 'topic', 'created_at', 'votes', 'comment_count');
+                            expect(body.article.comment_count).to.equal(0);
                         })
                 });
                 it('status: 404 returns Path not found', () => {
@@ -165,6 +164,75 @@ describe('/api', () => {
                         }) => {
                             expect(msg).to.equal("Method not allowed");
                         });
+                });
+            });
+            describe('PATCH', () => {
+                it('status: 200 returns the article object with updated votes', () => {
+                    return request(app)
+                        .patch('/api/articles/3')
+                        .send({
+                            inc_votes: 1
+                        })
+                        .expect(200)
+                        .then(({
+                            body
+                        }) => {
+                            expect(body).to.have.key('article');
+                            expect(body.article.votes).to.equal(1);
+                        })
+                });
+                it('status: 404 returns Path not found', () => {
+                    return request(app)
+                        .patch('/api/articles/35656')
+                        .expect(404)
+                        .then(({
+                            body: {
+                                msg
+                            }
+                        }) => {
+                            expect(msg).to.equal("Path not found");
+                        })
+                });
+                it('status: 200 returns the article object unchanged when an empty object is passed on request body', () => {
+                    return request(app)
+                        .patch('/api/articles/3')
+                        .send({})
+                        .expect(200)
+                        .then(({
+                            body
+                        }) => {
+                            expect(body).to.have.key('article');
+                            expect(body.article.votes).to.equal(0);
+                        })
+                });
+                it('status: 400 returns Bad request when inc_votes is not passed an integer', () => {
+                    return request(app)
+                        .patch('/api/articles/3')
+                        .send({
+                            inc_votes: "cats"
+                        })
+                        .expect(400)
+                        .then(({
+                            body: {
+                                msg
+                            }
+                        }) => {
+                            expect(msg).to.equal("Bad request");
+                        })
+                });
+                it('status: 200 returns the article object with updated votes and ignores the second property passed to the request body', () => {
+                    return request(app)
+                        .patch('/api/articles/3')
+                        .send({
+                            inc_votes: 1,
+                            name: 'Mitch'
+                        })
+                        .expect(200)
+                        .then(({
+                            body
+                        }) => {
+                            expect(body.article.votes).to.equal(1);
+                        })
                 });
             });
         });

@@ -20,3 +20,18 @@ exports.fetchArticleById = (article_id) => {
             }
         })
 };
+
+exports.updateArticleById = (article_id, inc_votes = 0) => {
+    return knex
+    .select('*')
+    .from('articles')
+    .where('article_id', article_id)
+    .increment('votes', inc_votes)
+    .returning('*')
+    .then((article) => {
+        if (!article.length) {            
+            return Promise.reject({status: 404, msg: "Path not found"});
+        }
+        else return article;
+    })
+}
