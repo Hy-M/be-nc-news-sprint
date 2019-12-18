@@ -1,10 +1,9 @@
 exports.formatDates = list => {
    let formattedDatesArr = list.map((article) => {
         let formattedDate = new Date(article.created_at);
-        article.created_at = formattedDate;
+        article.created_at = formattedDate;        
         return article;
     });
-
     return formattedDatesArr;
 };
 

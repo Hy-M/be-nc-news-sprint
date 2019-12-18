@@ -68,7 +68,7 @@ describe('/api', () => {
                             body
                         }) => {
                             expect(body).to.have.key('user');
-                            expect(body.user).to.contain.keys('username', 'avatar_url', 'name');
+                            expect(body.user[0]).to.contain.keys('username', 'avatar_url', 'name');
                         })
                 });
                 it('status: 404 returns Path not found when given a non-existant username', () => {
@@ -125,8 +125,8 @@ describe('/api', () => {
                             body
                         }) => {
                             expect(body).to.have.key('article');
-                            expect(body.article).to.contain.keys('author', 'title', 'article_id', 'body', 'topic', 'created_at', 'votes', 'comment_count');
-                            expect(body.article.comment_count).to.equal(0);
+                            expect(body.article[0]).to.contain.keys('author', 'title', 'article_id', 'body', 'topic', 'created_at', 'votes', 'comment_count');
+                            expect(body.article[0].comment_count).to.equal(0);
                         })
                 });
                 it('status: 404 returns Path not found', () => {
@@ -181,7 +181,7 @@ describe('/api', () => {
                             body
                         }) => {
                             expect(body).to.have.key('article');
-                            expect(body.article.votes).to.equal(1);
+                            expect(body.article[0].votes).to.equal(1);
                         })
                 });
                 it('status: 404 returns Path not found', () => {
@@ -205,7 +205,7 @@ describe('/api', () => {
                             body
                         }) => {
                             expect(body).to.have.key('article');
-                            expect(body.article.votes).to.equal(0);
+                            expect(body.article[0].votes).to.equal(0);
                         })
                 });
                 it('status: 400 returns Bad request when inc_votes is not passed an integer', () => {
@@ -234,7 +234,7 @@ describe('/api', () => {
                         .then(({
                             body
                         }) => {
-                            expect(body.article.votes).to.equal(1);
+                            expect(body.article[0].votes).to.equal(1);
                         })
                 });
             });
@@ -252,8 +252,8 @@ describe('/api', () => {
                                 body
                             }) => {
                                 expect(body).to.have.key('comment');
-                                expect(body.comment).to.contain.keys('author', 'body', 'comment_id', 'article_id', 'votes', 'created_at');
-                                expect(body.comment.author).to.equal('lurker');
+                                expect(body.comment[0]).to.contain.keys('author', 'body', 'comment_id', 'article_id', 'votes', 'created_at');
+                                expect(body.comment[0].author).to.equal('lurker');
                             })
                     });
                     it('status: 404 returns Path not found for a non-existant article_id', () => {
@@ -318,57 +318,125 @@ describe('/api', () => {
                                     comment
                                 }
                             }) => {
-                                expect(comment.votes).to.equal(0)
+                                expect(comment[0].votes).to.equal(0)
                             })
                     });
                 });
                 describe('GET', () => {
                     it('status: 200 returns the comments with default sorting and ordering', () => {
                         return request(app)
-                        .get('/api/articles/1/comments')
-                        .expect(200)
-                        .then(({body}) => {
-                            expect(body).to.have.key('comments');
-                            expect(body.comments[0]).to.contain.keys('comment_id', 'votes', 'created_at', 'author', 'body');
+                            .get('/api/articles/1/comments')
+                            .expect(200)
+                            .then(({
+                                body
+                            }) => {
+                                expect(body).to.have.key('comments');
+                                expect(body.comments[0]).to.contain.keys('comment_id', 'votes', 'created_at', 'author', 'body');
 
-                            const sortedColumn = body.comments.map((comment) => {
-                                return comment.created_at;
-                            })                      
-                            expect(sortedColumn).to.be.ascending;
-                        })
+                                const sortedColumn = body.comments.map((comment) => {
+                                    return comment.created_at;
+                                })
+                                expect(sortedColumn).to.be.ascending;
+                            })
                     });
                     it('status: 200 returns the comments with given sorting and default ordering', () => {
                         return request(app)
-                        .get('/api/articles/1/comments?sort_by=votes')
-                        .expect(200)
-                        .then(({body}) => {
-                            const sortedColumn = body.comments.map((comment) => {
-                                return comment.votes;
-                            })                      
-                            expect(sortedColumn).to.be.ascending;
-                        })
+                            .get('/api/articles/1/comments?sort_by=votes')
+                            .expect(200)
+                            .then(({
+                                body
+                            }) => {
+                                const sortedColumn = body.comments.map((comment) => {
+                                    return comment.votes;
+                                })
+                                expect(sortedColumn).to.be.ascending;
+                            })
                     });
                     it('status: 200 returns the comments with given sorting and given ordering', () => {
                         return request(app)
-                        .get('/api/articles/1/comments?sort_by=author&&order_by=desc')
-                        .expect(200)
-                        .then(({body}) => {
-                            const sortedColumn = body.comments.map((comment) => {
-                                return comment.author;
-                            })                   
-                            expect(sortedColumn).to.be.descending;
-                        })
+                            .get('/api/articles/1/comments?sort_by=author&&order_by=desc')
+                            .expect(200)
+                            .then(({
+                                body
+                            }) => {
+                                const sortedColumn = body.comments.map((comment) => {
+                                    return comment.author;
+                                })
+                                expect(sortedColumn).to.be.descending;
+                            })
                     });
                     it('status: 200 returns the comments with the default sorting and given ordering', () => {
                         return request(app)
-                        .get('/api/articles/1/comments?order_by=desc')
-                        .expect(200)
-                        .then(({body}) => {
-                            const sortedColumn = body.comments.map((comment) => {
-                                return comment.created_at;
-                            })                   
-                            expect(sortedColumn).to.be.descending;
-                        })
+                            .get('/api/articles/1/comments?order_by=desc')
+                            .expect(200)
+                            .then(({
+                                body
+                            }) => {
+                                const sortedColumn = body.comments.map((comment) => {
+                                    return comment.created_at;
+                                })
+                                expect(sortedColumn).to.be.descending;
+                            })
+                    });
+                    it('status: 404 returns Path not found when no comments exist for the article', () => {
+                        return request(app)
+                            .get('/api/articles/2/comments')
+                            .expect(404)
+                            .then(({
+                                body: {
+                                    msg
+                                }
+                            }) => {
+                                expect(msg).to.equal("Path not found");
+                            })
+                    });
+                    it('status: 404 returns Path not found when a non-existant path is given', () => {
+                        return request(app)
+                            .get('/api/articles/299034/comments')
+                            .expect(404)
+                            .then(({
+                                body: {
+                                    msg
+                                }
+                            }) => {
+                                expect(msg).to.equal("Path not found");
+                            })
+                    });
+                    it('status: 404 returns Path not found when an invalid query name is given', () => {
+                        return request(app)
+                            .get('/api/articles/3/comments?potato=asc')
+                            .expect(404)
+                            .then(({
+                                body: {
+                                    msg
+                                }
+                            }) => {
+                                expect(msg).to.equal("Path not found");
+                            })
+                    });
+                    it('status: 400 returns Bad request when an invalid sort_by value is given', () => {
+                        return request(app)
+                            .get('/api/articles/3/comments?sort_by=dogs')
+                            .expect(400)
+                            .then(({
+                                body: {
+                                    msg
+                                }
+                            }) => {
+                                expect(msg).to.equal("Bad request");
+                            })
+                    });
+                    it('status: 400 returns Bad request when an invalid order_by value is given', () => {
+                        return request(app)
+                            .get('/api/articles/3/comments?order_by=dogs')
+                            .expect(400)
+                            .then(({
+                                body: {
+                                    msg
+                                }
+                            }) => {
+                                expect(msg).to.equal("Bad request");
+                            })
                     });
                 });
             });
