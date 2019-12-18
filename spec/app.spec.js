@@ -304,6 +304,23 @@ describe('/api', () => {
                                 expect(msg).to.equal("Bad request");
                             })
                     });
+                    it('status: 201 returns an object of the posted comment and ignores extra properties on the req body', () => {
+                        return request(app)
+                            .post('/api/articles/3/comments')
+                            .send({
+                                username: 'lurker',
+                                body: 'lalala',
+                                votes: 36
+                            })
+                            .expect(201)
+                            .then(({
+                                body: {
+                                    comment
+                                }
+                            }) => {
+                                expect(comment.votes).to.equal(0)
+                            })
+                    });
                 });
             });
         });
