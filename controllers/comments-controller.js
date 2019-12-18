@@ -15,7 +15,7 @@ exports.postCommentByArticleId = (req, res, next) => {
         body
     } = req.body;
     Promise.all([insertCommentByArticleId(article_id, username, body), checkArticleExists(article_id)])
-        .then(([comment]) => {
+        .then(([comment]) => {           
             res.status(201).send({
                 comment: comment[0]
             });
