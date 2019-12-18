@@ -1,6 +1,8 @@
 const knex = require("../db/connection");
 
-exports.fetchUserById = (username) => {
+exports.fetchUserById = ({
+        username
+    }) => {
     if (Number(username)) {
         return Promise.reject({status: 400, msg: "Bad request"});
     }

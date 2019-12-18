@@ -8,27 +8,24 @@ const {
 } = require("../models/articles-model");
 
 exports.postCommentByArticleId = (req, res, next) => {
-    const {
-        article_id
-    } = req.params;
-    const {
-        username,
-        body
-    } = req.body;
-    Promise.all([insertCommentByArticleId(article_id, username, body), checkArticleExists(article_id)])
-        .then(([comment]) => {
+    checkArticleExists(req.params)
+        .then(() => {
+            return insertCommentByArticleId(req.params, req.body)
+        })
+        .then((comment) => {           
             res.status(201).send({
-                comment: comment[0]
+                comment
             });
         })
         .catch(next);
 };
 
 exports.getCommentsByArticleId = (req, res, next) => {
-    const { article_id } = req.params;
-    const { sort_by, order_by } = req.query;    
-    fetchCommentsByArticleId(article_id, sort_by, order_by)
-        .then((response) => {
-            res.status(200).send({comments: response})
+    fetchCommentsByArticleId(req.params, req.query)
+        .then((comments) => {
+            res.status(200).send({
+                comments
+            })
         })
+        .catch(next);
 };
