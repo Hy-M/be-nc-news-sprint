@@ -10,7 +10,12 @@ const chaiSorted = require("chai-sorted");
 const connection = require("../db/connection");
 chai.use(chaiSorted);
 
-beforeEach(() => connection.seed.run());
+
+beforeEach(function() {
+    this.timeout(10000);
+    return connection.seed.run();
+  });
+
 after(() => connection.destroy());
 
 describe('/api', () => {
