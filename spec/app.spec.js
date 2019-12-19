@@ -204,7 +204,7 @@ describe('/api', () => {
                 it('status: 200 returns the article object unchanged when an empty object is passed on request body', () => {
                     return request(app)
                         .patch('/api/articles/3')
-                        .send({})
+                        .send()
                         .expect(200)
                         .then(({
                             body
