@@ -34,7 +34,7 @@ exports.updateArticleById = ({ article_id }, { inc_votes = 0 }) => {
         }
         else return article;
     })
-}
+};
 
 exports.checkArticleExists = ({
         article_id
@@ -48,4 +48,26 @@ exports.checkArticleExists = ({
             return Promise.reject({status: 404, msg: "Path not found"})
         }
     })
-}
+};
+
+exports.fetchArticles = ({sort_by = 'created_at', order_by = 'desc', author, topic}) => {  
+    const validSortBys = ['author', 'article_id', 'title', 'topic', 'created_at', 'votes', 'comment_count'];
+    const validOrderBys = ['asc', 'desc'];
+    if (validSortBys.includes(sort_by) && validOrderBys.includes(order_by)) {
+        return knex
+        .select('articles.*')
+        .from('articles')
+        .modify((query) => {
+            if (author) query.where('articles.author', author);
+        })
+        .modify((query) => {
+            if (topic) query.where('articles.topic', topic);
+        })
+        .count('comment_id as comment_count')
+        .leftJoin('comments', 'comments.article_id', 'articles.article_id')
+        .groupBy('articles.article_id')
+        .orderBy(sort_by, order_by);
+    } else {
+        return Promise.reject({status: 400, msg: "Bad request"});
+    }
+};

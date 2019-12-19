@@ -402,18 +402,6 @@ describe('/api', () => {
                                 expect(msg).to.equal("Path not found");
                             })
                     });
-                    it('status: 404 returns Path not found when an invalid query name is given', () => {
-                        return request(app)
-                            .get('/api/articles/3/comments?potato=asc')
-                            .expect(404)
-                            .then(({
-                                body: {
-                                    msg
-                                }
-                            }) => {
-                                expect(msg).to.equal("Path not found");
-                            })
-                    });
                     it('status: 400 returns Bad request when an invalid sort_by value is given', () => {
                         return request(app)
                             .get('/api/articles/3/comments?sort_by=dogs')
@@ -439,6 +427,157 @@ describe('/api', () => {
                             })
                     });
                 });
+            });
+        });
+        describe('GET', () => {
+            it('status: 200 returns an articles array of objects with the correct keys, and default sort_by and order_by', () => {
+                return request(app)
+                    .get('/api/articles')
+                    .expect(200)
+                    .then(({
+                        body
+                    }) => {
+                        expect(body).to.have.key('articles');
+                        expect(body.articles).to.be.an('array');
+                        expect(body.articles[0]).to.contain.keys('author', 'title', 'article_id', 'topic', 'created_at', 'votes', 'comment_count');
+                        const sortedColumn = body.articles.map((article) => {
+                            return article.created_at;
+                        });
+                        expect(sortedColumn).to.be.descending;
+                    })
+            })
+            it('status: 200 returns an articles array of objects sorted by the given query', () => {
+                return request(app)
+                    .get('/api/articles?sort_by=votes')
+                    .expect(200)
+                    .then(({
+                        body
+                    }) => {
+                        const sortedColumn = body.articles.map((article) => {
+                            return article.votes;
+                        });
+                        expect(sortedColumn).to.be.descending;
+                    })
+            });
+            it('status: 200 returns an articles array of objects ordered by the given query', () => {
+                return request(app)
+                    .get('/api/articles?order_by=asc')
+                    .expect(200)
+                    .then(({
+                        body
+                    }) => {
+                        const sortedColumn = body.articles.map((article) => {
+                            return article.created_at;
+                        });
+                        expect(sortedColumn).to.be.ascending;
+                    })
+            });
+            it('status: 200 returns an articles array of objects sorted and ordered by the given queries', () => {
+                return request(app)
+                    .get('/api/articles?sort_by=votes&&order_by=asc')
+                    .expect(200)
+                    .then(({
+                        body
+                    }) => {
+                        const sortedColumn = body.articles.map((article) => {
+                            return article.votes;
+                        });
+                        expect(sortedColumn).to.be.ascending;
+                    })
+            });
+            it('status: 200 returns an articles array of objects filtered by the author query', () => {
+                return request(app)
+                    .get('/api/articles?author=icellusedkars')
+                    .expect(200)
+                    .then(({
+                        body
+                    }) => {
+                        const authorColumns = body.articles.every((article) => {
+                            return article.author === "icellusedkars"
+                        });
+                        expect(authorColumns).to.be.true;
+                    })
+            });
+            it('status: 200 returns an articles array of objects filtered by the topic query', () => {
+                return request(app)
+                    .get('/api/articles?topic=mitch')
+                    .expect(200)
+                    .then(({
+                        body
+                    }) => {
+                        const topicColumns = body.articles.every((article) => {
+                            return article.topic === "mitch"
+                        });
+                        expect(topicColumns).to.be.true;
+                    })
+            });
+            it('status: 400 returns Bad request when given an invalid sort_by value', () => {
+                return request(app)
+                    .get('/api/articles?sort_by=monkeys')
+                    .expect(400)
+                    .then(({
+                        body: {
+                            msg
+                        }
+                    }) => {
+                        expect(msg).to.equal("Bad request");
+                    })
+            });
+            it('status: 400 returns Bad request when given an invalid order_by value', () => {
+                return request(app)
+                    .get('/api/articles?order_by=big')
+                    .expect(400)
+                    .then(({
+                        body: {
+                            msg
+                        }
+                    }) => {
+                        expect(msg).to.equal("Bad request");
+                    })
+            });
+            it('status: 404 returns Path not found when given a non-existant author query', () => {
+                return request(app)
+                    .get('/api/articles?author=humayraa')
+                    .expect(404)
+                    .then(({
+                        body: {
+                            msg
+                        }
+                    }) => {
+                        expect(msg).to.equal("Path not found");
+                    })
+            });
+            it('status: 404 returns Path not found when given a non-existant topic query', () => {
+                return request(app)
+                    .get('/api/articles?topic=mushrooms')
+                    .expect(404)
+                    .then(({
+                        body: {
+                            msg
+                        }
+                    }) => {
+                        expect(msg).to.equal("Path not found");
+                    })
+            });
+            it('status: 200 returns an empty array when given a valid author query that results in no articles', () => {
+                return request(app)
+                    .get('/api/articles?author=lurker')
+                    .expect(200)
+                    .then(({
+                        body
+                    }) => {
+                        expect(body.articles).to.eql([]);
+                    })
+            });
+            it('status: 200 returns an empty array when given a valid topic query that results in no articles', () => {
+                return request(app)
+                    .get('/api/articles?topic=paper')
+                    .expect(200)
+                    .then(({
+                        body
+                    }) => {
+                        expect(body.articles).to.eql([]);
+                    })
             });
         });
     });
