@@ -11,10 +11,10 @@ const connection = require("../db/connection");
 chai.use(chaiSorted);
 
 
-beforeEach(function() {
+beforeEach(function () {
     this.timeout(10000);
     return connection.seed.run();
-  });
+});
 
 after(() => connection.destroy());
 
@@ -174,7 +174,7 @@ describe('/api', () => {
                     return Promise.all(methodPromises);
                 });
             });
-            describe('PATCH', () => {
+            describe.only('PATCH', () => {
                 it('status: 200 returns the article object with updated votes', () => {
                     return request(app)
                         .patch('/api/articles/3')
@@ -210,7 +210,7 @@ describe('/api', () => {
                             body
                         }) => {
                             expect(body).to.have.key('article');
-                            expect(body.article[0].votes).to.equal(0);
+                            expect(body.article.votes).to.equal(0);
                         })
                 });
                 it('status: 400 returns Bad request when inc_votes is not passed an integer', () => {
@@ -257,8 +257,8 @@ describe('/api', () => {
                                 body
                             }) => {
                                 expect(body).to.have.key('comment');
-                                expect(body.comment[0]).to.contain.keys('author', 'body', 'comment_id', 'article_id', 'votes', 'created_at');
-                                expect(body.comment[0].author).to.equal('lurker');
+                                expect(body.comment).to.contain.keys('author', 'body', 'comment_id', 'article_id', 'votes', 'created_at');
+                                expect(body.comment.author).to.equal('lurker');
                             })
                     });
                     it('status: 404 returns Path not found for a non-existant article_id', () => {
@@ -338,7 +338,7 @@ describe('/api', () => {
                                     comment
                                 }
                             }) => {
-                                expect(comment[0].votes).to.equal(0)
+                                expect(comment.votes).to.equal(0)
                             })
                     });
                 });
@@ -356,7 +356,7 @@ describe('/api', () => {
                                 const sortedColumn = body.comments.map((comment) => {
                                     return comment.created_at;
                                 })
-                                expect(sortedColumn).to.be.ascending;
+                                expect(sortedColumn).to.be.descending;
                             })
                     });
                     it('status: 200 returns the comments with given sorting and default ordering', () => {
@@ -369,7 +369,7 @@ describe('/api', () => {
                                 const sortedColumn = body.comments.map((comment) => {
                                     return comment.votes;
                                 })
-                                expect(sortedColumn).to.be.ascending;
+                                expect(sortedColumn).to.be.descending;
                             })
                     });
                     it('status: 200 returns the comments with given sorting and given ordering', () => {
@@ -712,7 +712,7 @@ describe('/api', () => {
                             expect(msg).to.equal('Method not allowed');
                         })
                 })
-
+                return Promise.all(methodPromises);
             });
         });
         describe('DELETE', () => {
@@ -753,6 +753,22 @@ describe('/api', () => {
                         expect(msg).to.equal("Bad request");
                     })
             });
+            // it('status: 405 returns Method not allowed', () => {
+            //     const invalidMethods = ['post', 'get'];
+            //     const methodPromises = invalidMethods.map((method) => {
+            //         return request(app)[method]('/api/articles/comments/1')
+            //             .expect(405)
+            //             .then(({
+            //                 body: {
+            //                     msg
+            //                 }
+            //             }) => {
+            //                 expect(msg).to.equal("Method not allowed");
+            //             })
+            //     });
+
+            //     return Promise.all(methodPromises);
+            // });
         });
     });
 });
