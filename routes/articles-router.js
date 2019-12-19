@@ -22,9 +22,11 @@ articlesRouter
     .route('/:article_id/comments')
     .post(postCommentByArticleId)
     .get(getCommentsByArticleId)
+    .all(handle405)
 
 articlesRouter
     .route('/')
     .get(getArticles)
+    .all(handle405)
 
 module.exports = articlesRouter;

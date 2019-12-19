@@ -68,7 +68,7 @@ describe('/api', () => {
                             body
                         }) => {
                             expect(body).to.have.key('user');
-                            expect(body.user[0]).to.contain.keys('username', 'avatar_url', 'name');
+                            expect(body.user).to.contain.keys('username', 'avatar_url', 'name');
                         })
                 });
                 it('status: 404 returns Path not found when given a non-existant username', () => {
@@ -119,14 +119,14 @@ describe('/api', () => {
             describe('GET', () => {
                 it('status: 200 returns one article object with the comment_count', () => {
                     return request(app)
-                        .get('/api/articles/3')
+                        .get('/api/articles/2')
                         .expect(200)
                         .then(({
                             body
                         }) => {
                             expect(body).to.have.key('article');
-                            expect(body.article[0]).to.contain.keys('author', 'title', 'article_id', 'body', 'topic', 'created_at', 'votes', 'comment_count');
-                            expect(body.article[0].comment_count).to.equal(0);
+                            expect(body.article).to.contain.keys('author', 'title', 'article_id', 'body', 'topic', 'created_at', 'votes', 'comment_count');
+                            expect(body.article.comment_count).to.equal(0);
                         })
                 });
                 it('status: 404 returns Path not found', () => {
@@ -174,14 +174,14 @@ describe('/api', () => {
                     return request(app)
                         .patch('/api/articles/3')
                         .send({
-                            inc_votes: 1
+                            inc_votes: 100
                         })
                         .expect(200)
                         .then(({
                             body
                         }) => {
                             expect(body).to.have.key('article');
-                            expect(body.article[0].votes).to.equal(1);
+                            expect(body.article[0].votes).to.equal(100);
                         })
                 });
                 it('status: 404 returns Path not found for a non-existant article_id', () => {
