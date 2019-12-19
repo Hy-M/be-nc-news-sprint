@@ -184,7 +184,7 @@ describe('/api', () => {
                             expect(body.article[0].votes).to.equal(1);
                         })
                 });
-                it('status: 404 returns Path not found', () => {
+                it('status: 404 returns Path not found for a non-existant article_id', () => {
                     return request(app)
                         .patch('/api/articles/35656')
                         .expect(404)
@@ -578,6 +578,108 @@ describe('/api', () => {
                     }) => {
                         expect(body.articles).to.eql([]);
                     })
+            });
+        });
+    });
+    describe('/comments/:comment_id', () => {
+        describe('PATCH', () => {
+            it('status: 200 returns an updated comment object when incrementing votes', () => {
+                return request(app)
+                    .patch('/api/comments/1')
+                    .send({
+                        inc_votes: 1
+                    })
+                    .expect(200)
+                    .then(({
+                        body
+                    }) => {
+                        expect(body).to.have.key('comment');
+                        expect(body.comment).to.contain.key('comment_id');
+                        expect(body.comment.votes).to.equal(17)
+                    })
+            });
+            it('status: 200 returns an updated comment object when decrementing votes', () => {
+                return request(app)
+                    .patch('/api/comments/1')
+                    .send({
+                        inc_votes: -3
+                    })
+                    .expect(200)
+                    .then(({
+                        body
+                    }) => {
+                        expect(body).to.have.key('comment');
+                        expect(body.comment).to.contain.key('comment_id');
+                        expect(body.comment.votes).to.equal(13)
+                    })
+            });
+            it('status: 404 returns Path not found for a non-existant comment_id', () => {
+                return request(app)
+                    .patch('/api/comments/923923')
+                    .expect(404)
+                    .then(({
+                        body: {
+                            msg
+                        }
+                    }) => {
+                        expect(msg).to.equal("Path not found");
+                    })
+            });
+            it('status: 200 returns the comment object unchanged when an empty object is passed on request body', () => {
+                return request(app)
+                    .patch('/api/comments/1')
+                    .send({})
+                    .expect(200)
+                    .then(({
+                        body
+                    }) => {
+                        expect(body).to.have.key('comment');
+                        expect(body.comment.votes).to.equal(16);
+                    })
+            });
+            it('status: 400 returns Bad request when inc_votes is not passed an integer', () => {
+                return request(app)
+                    .patch('/api/comments/1')
+                    .send({
+                        inc_votes: "cats"
+                    })
+                    .expect(400)
+                    .then(({
+                        body: {
+                            msg
+                        }
+                    }) => {
+                        expect(msg).to.equal("Bad request");
+                    })
+            });
+            it('status: 200 returns a comment object with updated votes and ignores the second property passed to the request body', () => {
+                return request(app)
+                    .patch('/api/comments/1')
+                    .send({
+                        inc_votes: 1,
+                        name: 'Mitch'
+                    })
+                    .expect(200)
+                    .then(({
+                        body
+                    }) => {
+                        expect(body.comment.votes).to.equal(17);
+                    })
+            });
+            it('status: 405 returns Method not allowed', () => {
+                const invalidMethods = ['post', 'get'];
+                const methodPromises = invalidMethods.map((method) => {
+                    return request(app)[method]('/api/comments/1')
+                        .expect(405)
+                        .then(({
+                            body: {
+                                msg
+                            }
+                        }) => {
+                            expect(msg).to.equal('Method not allowed');
+                        })
+                })
+
             });
         });
     });
