@@ -354,7 +354,7 @@ describe('/api', () => {
                     });
                     it('status: 200 returns the comments with given sorting and given ordering', () => {
                         return request(app)
-                            .get('/api/articles/1/comments?sort_by=author&&order_by=desc')
+                            .get('/api/articles/1/comments?sort_by=author&&order=desc')
                             .expect(200)
                             .then(({
                                 body
@@ -367,7 +367,7 @@ describe('/api', () => {
                     });
                     it('status: 200 returns the comments with the default sorting and given ordering', () => {
                         return request(app)
-                            .get('/api/articles/1/comments?order_by=desc')
+                            .get('/api/articles/1/comments?order=desc')
                             .expect(200)
                             .then(({
                                 body
@@ -416,7 +416,7 @@ describe('/api', () => {
                     });
                     it('status: 400 returns Bad request when an invalid order_by value is given', () => {
                         return request(app)
-                            .get('/api/articles/3/comments?order_by=dogs')
+                            .get('/api/articles/3/comments?order=dogs')
                             .expect(400)
                             .then(({
                                 body: {
@@ -461,7 +461,7 @@ describe('/api', () => {
             });
             it('status: 200 returns an articles array of objects ordered by the given query', () => {
                 return request(app)
-                    .get('/api/articles?order_by=asc')
+                    .get('/api/articles?order=asc')
                     .expect(200)
                     .then(({
                         body
@@ -474,7 +474,7 @@ describe('/api', () => {
             });
             it('status: 200 returns an articles array of objects sorted and ordered by the given queries', () => {
                 return request(app)
-                    .get('/api/articles?sort_by=votes&&order_by=asc')
+                    .get('/api/articles?sort_by=votes&&order=asc')
                     .expect(200)
                     .then(({
                         body
@@ -525,7 +525,7 @@ describe('/api', () => {
             });
             it('status: 400 returns Bad request when given an invalid order_by value', () => {
                 return request(app)
-                    .get('/api/articles?order_by=big')
+                    .get('/api/articles?order=big')
                     .expect(400)
                     .then(({
                         body: {

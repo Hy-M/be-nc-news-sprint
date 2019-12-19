@@ -50,10 +50,10 @@ exports.checkArticleExists = ({
     })
 };
 
-exports.fetchArticles = ({sort_by = 'created_at', order_by = 'desc', author, topic}) => {  
+exports.fetchArticles = ({sort_by = 'created_at', order = 'desc', author, topic}) => {  
     const validSortBys = ['author', 'article_id', 'title', 'topic', 'created_at', 'votes', 'comment_count'];
     const validOrderBys = ['asc', 'desc'];
-    if (validSortBys.includes(sort_by) && validOrderBys.includes(order_by)) {
+    if (validSortBys.includes(sort_by) && validOrderBys.includes(order)) {
         return knex
         .select('articles.*')
         .from('articles')
@@ -66,7 +66,7 @@ exports.fetchArticles = ({sort_by = 'created_at', order_by = 'desc', author, top
         .count('comment_id as comment_count')
         .leftJoin('comments', 'comments.article_id', 'articles.article_id')
         .groupBy('articles.article_id')
-        .orderBy(sort_by, order_by);
+        .orderBy(sort_by, order);
     } else {
         return Promise.reject({status: 400, msg: "Bad request"});
     }
