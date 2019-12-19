@@ -65,3 +65,15 @@ exports.updateCommentById = ({comment_id}, {inc_votes = 0}) => {
       }
    })
 };
+
+exports.removeCommentById = ({comment_id}) => {
+   return knex
+   .delete('*')
+   .from('comments')
+   .where('comment_id', comment_id)
+   .then((delCount) => {
+      if (!delCount.length) {
+         return Promise.reject({status: 404, msg: "Path not found"})
+      }
+   })
+};

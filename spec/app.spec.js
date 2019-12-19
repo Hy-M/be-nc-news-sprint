@@ -652,6 +652,21 @@ describe('/api', () => {
                         expect(msg).to.equal("Bad request");
                     })
             });
+            it('status: 400 returns Bad request when given an invalid comment_id', () => {
+                return request(app)
+                    .patch('/api/comments/one')
+                    .send({
+                        inc_votes: 1
+                    })
+                    .expect(400)
+                    .then(({
+                        body: {
+                            msg
+                        }
+                    }) => {
+                        expect(msg).to.equal("Bad request");
+                    })
+            });
             it('status: 200 returns a comment object with updated votes and ignores the second property passed to the request body', () => {
                 return request(app)
                     .patch('/api/comments/1')
@@ -680,6 +695,45 @@ describe('/api', () => {
                         })
                 })
 
+            });
+        });
+        describe('DELETE', () => {
+            it('status: 204 returns no content on response body', () => {
+                return request(app)
+                    .delete('/api/comments/1')
+                    .expect(204)
+                    .then(({
+                        body
+                    }) => {
+                        expect(body).to.eql({});
+                    })
+            });
+            it('status: 404 returns Path not found when given a non-existant comment_id', () => {
+                return request(app)
+                    .delete('/api/comments/25693')
+                    .expect(404)
+                    .then(({
+                        body: {
+                            msg
+                        }
+                    }) => {
+                        expect(msg).to.equal("Path not found");
+                    })
+            });
+            it('status: 400 returns Bad request when given an invalid comment_id', () => {
+                return request(app)
+                    .delete('/api/comments/one')
+                    .send({
+                        inc_votes: 1
+                    })
+                    .expect(400)
+                    .then(({
+                        body: {
+                            msg
+                        }
+                    }) => {
+                        expect(msg).to.equal("Bad request");
+                    })
             });
         });
     });

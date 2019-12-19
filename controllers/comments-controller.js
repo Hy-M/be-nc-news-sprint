@@ -1,7 +1,8 @@
 const {
     insertCommentByArticleId,
     fetchCommentsByArticleId,
-    updateCommentById
+    updateCommentById,
+    removeCommentById
 } = require("../models/comments-model");
 
 const {
@@ -28,8 +29,7 @@ exports.getCommentsByArticleId = (req, res, next) => {
                 comments
             })
         })
-        .catch(err => console.log(err, "<controlle rror"));
-        ;
+        .catch(next);
 };
 
 exports.patchCommentById = (req, res, next) => {
@@ -43,5 +43,9 @@ exports.patchCommentById = (req, res, next) => {
 };
 
 exports.deleteCommentById = (req, res, next) => {
-
+    removeCommentById(req.params)
+        .then(() => {
+            res.sendStatus(204);
+        })
+        .catch(next);
 };
