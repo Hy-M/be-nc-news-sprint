@@ -21,16 +21,16 @@ exports.fetchCommentsByArticleId = ({
    article_id
 }, {
    sort_by = 'created_at',
-   order_by = "asc"
+   order = "asc"
 }) => {
    const validOrderBys = ['asc', 'desc'];
    const validSortBys = ['author', 'body', 'created_at', 'votes', 'comment_id'];
-   if (validSortBys.includes(sort_by) && validOrderBys.includes(order_by)) {
+   if (validSortBys.includes(sort_by) && validOrderBys.includes(order)) {
       return knex
          .select('author', 'body', 'created_at', 'votes', 'comment_id')
          .from('comments')
          .where('article_id', article_id)
-         .orderBy(sort_by, order_by)
+         .orderBy(sort_by, order)
          .then((comments) => {
             if (!comments.length) {
                return Promise.reject({
