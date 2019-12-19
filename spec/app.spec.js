@@ -309,6 +309,21 @@ describe('/api', () => {
                                 expect(msg).to.equal("Bad request");
                             })
                     });
+                    it('status: 400 returns Bad request when all of the required keys are not passed', () => {
+                        return request(app)
+                            .post('/api/articles/3/comments')
+                            .send({
+                                username: "lurker"
+                            })
+                            .expect(400)
+                            .then(({
+                                body: {
+                                    msg
+                                }
+                            }) => {
+                                expect(msg).to.equal("Bad request");
+                            })
+                    });
                     it('status: 201 returns an object of the posted comment and ignores extra properties on the req body', () => {
                         return request(app)
                             .post('/api/articles/3/comments')
@@ -383,19 +398,17 @@ describe('/api', () => {
                                 expect(sortedColumn).to.be.descending;
                             })
                     });
-                    it('status: 404 returns Path not found when no comments exist for the article', () => {
+                    it('status: 200 returns empty array for a valid article with no comments', () => {
                         return request(app)
                             .get('/api/articles/2/comments')
-                            .expect(404)
+                            .expect(200)
                             .then(({
-                                body: {
-                                    msg
-                                }
+                                body
                             }) => {
-                                expect(msg).to.equal("Path not found");
+                                expect(body.comments).to.be.an('array');
                             })
                     });
-                    it('status: 404 returns Path not found when a non-existant path is given', () => {
+                    it('status: 404 returns Path not found when a non-existant article_id is given', () => {
                         return request(app)
                             .get('/api/articles/299034/comments')
                             .expect(404)
