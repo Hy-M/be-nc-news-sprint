@@ -174,7 +174,7 @@ describe('/api', () => {
                     return Promise.all(methodPromises);
                 });
             });
-            describe.only('PATCH', () => {
+            describe('PATCH', () => {
                 it('status: 200 returns the article object with updated votes', () => {
                     return request(app)
                         .patch('/api/articles/3')
