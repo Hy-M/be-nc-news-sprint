@@ -28,7 +28,7 @@ exports.fetchCommentsByArticleId = ({
    article_id
 }, {
    sort_by = 'created_at',
-   order = "asc"
+   order = "desc"
 }) => {
    const validOrderBys = ['asc', 'desc'];
    const validSortBys = ['author', 'body', 'created_at', 'votes', 'comment_id'];
@@ -59,7 +59,7 @@ exports.updateCommentById = ({
       .select('*')
       .from('comments')
       .where('comment_id', comment_id)
-      .increment('votes', inc_votes)
+      .increment('votes', inc_votes || 0)
       .returning('*')
       .then((comment) => {
          if (!comment.length) {
