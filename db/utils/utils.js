@@ -1,9 +1,12 @@
 exports.formatDates = list => {
    let formattedDatesArr = list.map((article) => {
-        let formattedDate = new Date(article.created_at);
-        article.created_at = formattedDate;        
-        return article;
+        let newArticleObj = {...article};  
+        let formattedDate = new Date(newArticleObj.created_at); 
+        newArticleObj.created_at = formattedDate;        
+        return newArticleObj;
     });
+    console.log(formattedDatesArr, "<<<<<");
+    
     return formattedDatesArr;
 };
 

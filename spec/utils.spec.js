@@ -20,8 +20,8 @@ describe('formatDates', () => {
       created_at: '2013-11-28 23:09:11.761166+03',
     }];
     const formattedDate = new Date(articles[0].created_at);
-    formatDates(articles);
-    expect(articles[0].created_at).to.eql(formattedDate);
+    const result = formatDates(articles);
+    expect(result[0].created_at).to.eql(formattedDate);
   });
   it('checks that the created_at key is an instance of Date', () => {
     const articles = [{
@@ -45,6 +45,17 @@ describe('formatDates', () => {
     }];
     const formattedDatesArr = formatDates(articles);
     expect(formattedDatesArr).to.not.equal(articles);
+  });
+  it('checks that the original passed in objects have a different reference to the returned objects', () => {
+    const articles = [{
+      title: 'Seven inspirational thought leaders from Manchester UK',
+      topic: 'mitch',
+      author: 'rogersop',
+      body: "Who are we kidding, there is only one, and it's Mitch!",
+      created_at: '2013-11-28 23:09:11.761166+03',
+    }];
+    const result = formatDates(articles);
+    expect(result[0]).to.not.equal(articles[0]);
   });
   it('returns the date formatted correctly when passed multiple date objects in an array', () => {
     const articles = [{
@@ -70,9 +81,9 @@ describe('formatDates', () => {
     ];
     const formattedDate = new Date(articles[0].created_at);
     const formattedDate2 = new Date(articles[1].created_at);
-    formatDates(articles);
-    expect(articles[0].created_at).to.eql(formattedDate);
-    expect(articles[1].created_at).to.eql(formattedDate2);
+    const result = formatDates(articles);
+    expect(result[0].created_at).to.eql(formattedDate);
+    expect(result[1].created_at).to.eql(formattedDate2);
   });
 });
 
