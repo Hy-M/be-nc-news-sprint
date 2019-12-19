@@ -23,7 +23,10 @@ exports.postCommentByArticleId = (req, res, next) => {
 };
 
 exports.getCommentsByArticleId = (req, res, next) => {
-    fetchCommentsByArticleId(req.params, req.query)
+    checkArticleExists(req.params)
+        .then(() => {
+            return fetchCommentsByArticleId(req.params, req.query)
+        })
         .then((comments) => {
             res.status(200).send({
                 comments

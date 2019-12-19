@@ -4,9 +4,7 @@ exports.formatDates = list => {
         let formattedDate = new Date(newArticleObj.created_at); 
         newArticleObj.created_at = formattedDate;        
         return newArticleObj;
-    });
-    console.log(formattedDatesArr, "<<<<<");
-    
+    });   
     return formattedDatesArr;
 };
 
