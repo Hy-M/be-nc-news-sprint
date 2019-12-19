@@ -5,3 +5,17 @@ exports.fetchTopics = () => {
     .select("*")
     .from("topics");
 }
+
+exports.checkTopicExists = ({topic}) => {
+    return knex
+    .select('*')
+    .from('topics')
+    .modify((query) => {
+        if (topic) query.where('slug', topic);
+    })
+    .then((topic) => {
+        if (!topic.length) {
+            return Promise.reject({status: 404, msg: "Path not found"})
+        }
+    })
+};

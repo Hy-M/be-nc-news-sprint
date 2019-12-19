@@ -17,3 +17,17 @@ exports.fetchUserById = ({
         return user;
     });
 }
+
+exports.checkUserExists = ({author}) => {
+    return knex
+    .select('*')
+    .from('users')
+    .modify((query) => {
+        if (author) query.where('username', author);
+    })
+    .then((user) => {
+        if (!user.length) {            
+            return Promise.reject({status: 404, msg: "Path not found"})
+        }
+    })
+};
