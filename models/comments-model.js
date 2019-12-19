@@ -49,3 +49,19 @@ exports.fetchCommentsByArticleId = ({
    }
 
 }
+
+exports.updateCommentById = ({comment_id}, {inc_votes = 0}) => {
+   return knex
+   .select('*')
+   .from('comments')
+   .where('comment_id', comment_id)
+   .increment('votes', inc_votes)
+   .returning('*')
+   .then((comment) => {
+      if(!comment.length) {         
+         return Promise.reject({status: 404, msg: "Path not found"});
+      } else {
+         return comment;
+      }
+   })
+};
