@@ -9,7 +9,7 @@ const { checkTopicExists } = require("../models/topics-model");
 exports.getArticleById = (req, res, next) => {
     fetchArticleById(req.params)
     .then((article) => {
-       res.status(200).send({article});
+       res.status(200).send({article: article[0]});
     })
     .catch(next);
 };
