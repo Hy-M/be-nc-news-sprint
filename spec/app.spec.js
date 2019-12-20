@@ -771,4 +771,14 @@ describe('/api', () => {
             // });
         });
     });
+    describe('GET', () => {
+        it('returns all the available endpoints as JSON', () => {
+            return request(app)
+            .get('/api')
+            .expect(200)
+            .then(({body}) => {
+                expect(body).to.have.key('endpoints');
+            })
+        });
+    });
 });
