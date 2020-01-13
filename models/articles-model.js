@@ -12,7 +12,7 @@ exports.fetchArticleById = ({article_id}) => {
             if (!article[0]) {
                 return Promise.reject({
                     status: 404,
-                    msg: "Path not found"
+                    msg: "Article not found"
                 })
             } else {
                 article[0].comment_count = Number(article[0].comment_count);
