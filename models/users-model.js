@@ -12,7 +12,7 @@ exports.fetchUserById = ({
     .where("username", username)
     .then((user) => {
         if (!user.length) {
-            return Promise.reject({status: 404, msg: "Path not found"});
+            return Promise.reject({status: 404, msg: "User not found"});
         }
         return user;
     });
@@ -27,7 +27,7 @@ exports.checkUserExists = ({author}) => {
     })
     .then((user) => {
         if (!user.length) {            
-            return Promise.reject({status: 404, msg: "Path not found"})
+            return Promise.reject({status: 404, msg: "User not found"})
         }
     })
 };

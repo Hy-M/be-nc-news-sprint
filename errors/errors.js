@@ -5,7 +5,6 @@ exports.handle405 = (req, res, next) => {
     });
 }
 
-
 // error-handling middleware functions
 exports.handle404 = (err, req, res, next) => {
     if (err.status === 404) {

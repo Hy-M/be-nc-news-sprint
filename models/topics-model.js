@@ -15,7 +15,7 @@ exports.checkTopicExists = ({topic}) => {
     })
     .then((topic) => {
         if (!topic.length) {
-            return Promise.reject({status: 404, msg: "Path not found"})
+            return Promise.reject({status: 404, msg: "Topic not found"})
         }
     })
 };
