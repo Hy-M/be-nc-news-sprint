@@ -10,7 +10,8 @@ exports.handle405 = (req, res, next) => {
 exports.handle404 = (err, req, res, next) => {
     if (err.status === 404) {
         res.status(404).send({
-            msg: "Path not found"
+            msg: err.msg
+            // msg: "Path not found"
         });
     }
     next(err);
