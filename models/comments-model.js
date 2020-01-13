@@ -65,7 +65,7 @@ exports.updateCommentById = ({
          if (!comment.length) {
             return Promise.reject({
                status: 404,
-               msg: "Path not found"
+               msg: "Comment not found"
             });
          } else {
             return comment;
@@ -84,7 +84,7 @@ exports.removeCommentById = ({
          if (!delCount.length) {
             return Promise.reject({
                status: 404,
-               msg: "Path not found"
+               msg: "Comment not found"
             })
          }
       })

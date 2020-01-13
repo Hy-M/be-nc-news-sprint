@@ -30,7 +30,7 @@ exports.updateArticleById = ({ article_id }, { inc_votes = 0 }) => {
     .returning('*')
     .then((article) => {
         if (!article.length) {            
-            return Promise.reject({status: 404, msg: "Path not found"});
+            return Promise.reject({status: 404, msg: "Article not found"});
         }
         else return article;
     })
@@ -45,7 +45,7 @@ exports.checkArticleExists = ({
     .where('article_id', article_id)
     .then((article) => {
         if (!article.length) {
-            return Promise.reject({status: 404, msg: "Path not found"})
+            return Promise.reject({status: 404, msg: "Article not found"})
         }
     })
 };
