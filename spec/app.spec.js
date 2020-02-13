@@ -4,25 +4,57 @@ const chai = require("chai");
 const {
     expect
 } = chai;
-const request = require("supertest");
 const app = require("../app");
+const defaults = require('superagent-defaults');
+const request = defaults(require("supertest")(app));
 const chaiSorted = require("chai-sorted");
 const connection = require("../db/connection");
 chai.use(chaiSorted);
 
-
 beforeEach(function () {
     this.timeout(10000);
-    return connection.seed.run();
+    return connection
+    .migrate.rollback()
+    .then(() => connection.migrate.latest())
+    .then(() => connection.seed.run())
+    .then(() => {
+      return request
+        .post('/api/login')
+        .expect(200)
+        .send({ username: 'lurker'})
+    })
+    .then(({ body: { token } }) => {
+        request.set('Authorization', `BEARER ${token}`)
+    });
 });
 
 after(() => connection.destroy());
 
 describe('/api', () => {
+    describe('login', () => {
+        it('status: 200 responds with an access token when given correct username', () => {
+         return request
+          .post('/api/login')
+          .send({ username: 'lurker'})
+          .expect(200)
+          .then(({ body }) => {
+            expect(body).to.have.ownProperty('token');
+            })
+        });
+        it('status: 401 when given a non-existant username', () => {
+            return request
+            .post('/api/login')
+            .send({ username: 'Humayraa' })
+            .expect(401)
+            .then(({ body }) => {
+                expect(body).to.haveOwnProperty('msg');
+            })
+        });
+    });
     describe('/topics', () => {
         describe('GET', () => {
             it('status: 200 returns an array of topics objects with keys of slug and description', () => {
-                return request(app)
+                return request
                     .get('/api/topics')
                     .expect(200)
                     .then(({
@@ -33,7 +65,7 @@ describe('/api', () => {
                     })
             });
             it('status: 404 returns Path not found when given an invalid path', () => {
-                return request(app)
+                return request
                     .get('/api/topik')
                     .expect(404)
                     .then(({
@@ -47,7 +79,7 @@ describe('/api', () => {
             it('status: 405 returns Method not allowed', () => {
                 const invalidMethods = ["put", "patch", "delete"];
                 const methodPromises = invalidMethods.map((method) => {
-                    return request(app)[method]('/api/topics')
+                    return request[method]('/api/topics')
                         .expect(405)
                         .then(({
                             body: {
@@ -66,7 +98,7 @@ describe('/api', () => {
         describe('/:username', () => {
             describe('GET', () => {
                 it('status: 200 returns one user object with keys of username, avatar_url and name', () => {
-                    return request(app)
+                    return request
                         .get('/api/users/butter_bridge')
                         .expect(200)
                         .then(({
@@ -76,8 +108,8 @@ describe('/api', () => {
                             expect(body.user).to.contain.keys('username', 'avatar_url', 'name');
                         })
                 });
-                it('status: 404 returns Path not found when given a non-existant username', () => {
-                    return request(app)
+                it('status: 404 returns User not found when given a non-existant username', () => {
+                    return request
                         .get('/api/users/humayraa')
                         .expect(404)
                         .then(({
@@ -85,11 +117,11 @@ describe('/api', () => {
                                 msg
                             }
                         }) => {
-                            expect(msg).to.equal("Path not found");
+                            expect(msg).to.equal("User not found");
                         })
                 });
                 it('status: 400 returns Bad request when given an invalid username', () => {
-                    return request(app)
+                    return request
                         .get('/api/users/20')
                         .expect(400)
                         .then(({
@@ -103,7 +135,7 @@ describe('/api', () => {
                 it('status: 405 returns Method not allowed', () => {
                     const invalidMethods = ["put", "patch", "delete"];
                     const methodPromises = invalidMethods.map((method) => {
-                        return request(app)[method]('/api/users/butter_bridge')
+                        return request[method]('/api/users/butter_bridge')
                             .expect(405)
                             .then(({
                                 body: {
@@ -123,7 +155,7 @@ describe('/api', () => {
         describe('/:article_id', () => {
             describe('GET', () => {
                 it('status: 200 returns one article object with the comment_count', () => {
-                    return request(app)
+                    return request
                         .get('/api/articles/2')
                         .expect(200)
                         .then(({
@@ -134,8 +166,8 @@ describe('/api', () => {
                             expect(body.article.comment_count).to.equal(0);
                         })
                 });
-                it('status: 404 returns Path not found', () => {
-                    return request(app)
+                it('status: 404 returns Article not found', () => {
+                    return request
                         .get('/api/articles/309284')
                         .expect(404)
                         .then(({
@@ -143,11 +175,11 @@ describe('/api', () => {
                                 msg
                             }
                         }) => {
-                            expect(msg).to.equal("Path not found");
+                            expect(msg).to.equal("Article not found");
                         })
                 });
                 it('status: 400 returns Bad Request', () => {
-                    return request(app)
+                    return request
                         .get('/api/articles/three')
                         .expect(400)
                         .then(({
@@ -161,7 +193,7 @@ describe('/api', () => {
                 it('status: 405 returns Method not allowed', () => {
                     const invalidMethods = ['post', 'delete'];
                     const methodPromises = invalidMethods.map((method) => {
-                        return request(app)[method]('/api/articles/3')
+                        return request[method]('/api/articles/3')
                             .expect(405)
                             .then(({
                                 body: {
@@ -176,7 +208,7 @@ describe('/api', () => {
             });
             describe('PATCH', () => {
                 it('status: 200 returns the article object with updated votes', () => {
-                    return request(app)
+                    return request
                         .patch('/api/articles/3')
                         .send({
                             inc_votes: 100
@@ -186,11 +218,11 @@ describe('/api', () => {
                             body
                         }) => {
                             expect(body).to.have.key('article');
-                            expect(body.article[0].votes).to.equal(100);
+                            expect(body.article.votes).to.equal(100);
                         })
                 });
-                it('status: 404 returns Path not found for a non-existant article_id', () => {
-                    return request(app)
+                it('status: 404 returns Article not found for a non-existant article_id', () => {
+                    return request
                         .patch('/api/articles/35656')
                         .expect(404)
                         .then(({
@@ -198,11 +230,11 @@ describe('/api', () => {
                                 msg
                             }
                         }) => {
-                            expect(msg).to.equal("Path not found");
+                            expect(msg).to.equal("Article not found");
                         })
                 });
                 it('status: 200 returns the article object unchanged when an empty object is passed on request body', () => {
-                    return request(app)
+                    return request
                         .patch('/api/articles/3')
                         .send()
                         .expect(200)
@@ -214,7 +246,7 @@ describe('/api', () => {
                         })
                 });
                 it('status: 400 returns Bad request when inc_votes is not passed an integer', () => {
-                    return request(app)
+                    return request
                         .patch('/api/articles/3')
                         .send({
                             inc_votes: "cats"
@@ -229,7 +261,7 @@ describe('/api', () => {
                         })
                 });
                 it('status: 200 returns the article object with updated votes and ignores the second property passed to the request body', () => {
-                    return request(app)
+                    return request
                         .patch('/api/articles/3')
                         .send({
                             inc_votes: 1,
@@ -239,14 +271,14 @@ describe('/api', () => {
                         .then(({
                             body
                         }) => {
-                            expect(body.article[0].votes).to.equal(1);
+                            expect(body.article.votes).to.equal(1);
                         })
                 });
             });
             describe('/comments', () => {
                 describe('POST', () => {
                     it('status: 201 returns an object of the posted comment', () => {
-                        return request(app)
+                        return request
                             .post('/api/articles/3/comments')
                             .send({
                                 username: "lurker",
@@ -261,8 +293,8 @@ describe('/api', () => {
                                 expect(body.comment.author).to.equal('lurker');
                             })
                     });
-                    it('status: 404 returns Path not found for a non-existant article_id', () => {
-                        return request(app)
+                    it('status: 404 returns Article not found for a non-existant article_id', () => {
+                        return request
                             .post('/api/articles/935794/comments')
                             .send({
                                 username: "lurker",
@@ -274,11 +306,11 @@ describe('/api', () => {
                                     msg
                                 }
                             }) => {
-                                expect(msg).to.equal("Path not found");
+                                expect(msg).to.equal("Article not found");
                             })
                     })
                     it('status: 404 returns Path not found for a mispelled endpoint', () => {
-                        return request(app)
+                        return request
                             .post('/api/articles/3/commentz')
                             .send({
                                 username: "lurker",
@@ -294,7 +326,7 @@ describe('/api', () => {
                             })
                     })
                     it('status: 400 returns Bad request when given an invalid article_id', () => {
-                        return request(app)
+                        return request
                             .post('/api/articles/three/comments')
                             .send({
                                 username: "lurker",
@@ -310,7 +342,7 @@ describe('/api', () => {
                             })
                     });
                     it('status: 400 returns Bad request when all of the required keys are not passed', () => {
-                        return request(app)
+                        return request
                             .post('/api/articles/3/comments')
                             .send({
                                 username: "lurker"
@@ -325,7 +357,7 @@ describe('/api', () => {
                             })
                     });
                     it('status: 201 returns an object of the posted comment and ignores extra properties on the req body', () => {
-                        return request(app)
+                        return request
                             .post('/api/articles/3/comments')
                             .send({
                                 username: 'lurker',
@@ -344,7 +376,7 @@ describe('/api', () => {
                 });
                 describe('GET', () => {
                     it('status: 200 returns the comments with default sorting and ordering', () => {
-                        return request(app)
+                        return request
                             .get('/api/articles/1/comments')
                             .expect(200)
                             .then(({
@@ -360,7 +392,7 @@ describe('/api', () => {
                             })
                     });
                     it('status: 200 returns the comments with given sorting and default ordering', () => {
-                        return request(app)
+                        return request
                             .get('/api/articles/1/comments?sort_by=votes')
                             .expect(200)
                             .then(({
@@ -373,7 +405,7 @@ describe('/api', () => {
                             })
                     });
                     it('status: 200 returns the comments with given sorting and given ordering', () => {
-                        return request(app)
+                        return request
                             .get('/api/articles/1/comments?sort_by=author&&order=desc')
                             .expect(200)
                             .then(({
@@ -386,7 +418,7 @@ describe('/api', () => {
                             })
                     });
                     it('status: 200 returns the comments with the default sorting and given ordering', () => {
-                        return request(app)
+                        return request
                             .get('/api/articles/1/comments?order=desc')
                             .expect(200)
                             .then(({
@@ -399,7 +431,7 @@ describe('/api', () => {
                             })
                     });
                     it('status: 200 returns empty array for a valid article with no comments', () => {
-                        return request(app)
+                        return request
                             .get('/api/articles/2/comments')
                             .expect(200)
                             .then(({
@@ -408,8 +440,8 @@ describe('/api', () => {
                                 expect(body.comments).to.be.an('array');
                             })
                     });
-                    it('status: 404 returns Path not found when a non-existant article_id is given', () => {
-                        return request(app)
+                    it('status: 404 returns Article not found when a non-existant article_id is given', () => {
+                        return request
                             .get('/api/articles/299034/comments')
                             .expect(404)
                             .then(({
@@ -417,11 +449,11 @@ describe('/api', () => {
                                     msg
                                 }
                             }) => {
-                                expect(msg).to.equal("Path not found");
+                                expect(msg).to.equal("Article not found");
                             })
                     });
                     it('status: 400 returns Bad request when an invalid sort_by value is given', () => {
-                        return request(app)
+                        return request
                             .get('/api/articles/3/comments?sort_by=dogs')
                             .expect(400)
                             .then(({
@@ -433,7 +465,7 @@ describe('/api', () => {
                             })
                     });
                     it('status: 400 returns Bad request when an invalid order_by value is given', () => {
-                        return request(app)
+                        return request
                             .get('/api/articles/3/comments?order=dogs')
                             .expect(400)
                             .then(({
@@ -449,7 +481,7 @@ describe('/api', () => {
         });
         describe('GET', () => {
             it('status: 200 returns an articles array of objects with the correct keys, and default sort_by and order_by', () => {
-                return request(app)
+                return request
                     .get('/api/articles')
                     .expect(200)
                     .then(({
@@ -465,7 +497,7 @@ describe('/api', () => {
                     })
             })
             it('status: 200 returns an articles array of objects sorted by the given query', () => {
-                return request(app)
+                return request
                     .get('/api/articles?sort_by=votes')
                     .expect(200)
                     .then(({
@@ -478,7 +510,7 @@ describe('/api', () => {
                     })
             });
             it('status: 200 returns an articles array of objects ordered by the given query', () => {
-                return request(app)
+                return request
                     .get('/api/articles?order=asc')
                     .expect(200)
                     .then(({
@@ -491,7 +523,7 @@ describe('/api', () => {
                     })
             });
             it('status: 200 returns an articles array of objects sorted and ordered by the given queries', () => {
-                return request(app)
+                return request
                     .get('/api/articles?sort_by=votes&&order=asc')
                     .expect(200)
                     .then(({
@@ -504,7 +536,7 @@ describe('/api', () => {
                     })
             });
             it('status: 200 returns an articles array of objects filtered by the author query', () => {
-                return request(app)
+                return request
                     .get('/api/articles?author=icellusedkars')
                     .expect(200)
                     .then(({
@@ -517,7 +549,7 @@ describe('/api', () => {
                     })
             });
             it('status: 200 returns an articles array of objects filtered by the topic query', () => {
-                return request(app)
+                return request
                     .get('/api/articles?topic=mitch')
                     .expect(200)
                     .then(({
@@ -530,7 +562,7 @@ describe('/api', () => {
                     })
             });
             it('status: 400 returns Bad request when given an invalid sort_by value', () => {
-                return request(app)
+                return request
                     .get('/api/articles?sort_by=monkeys')
                     .expect(400)
                     .then(({
@@ -542,7 +574,7 @@ describe('/api', () => {
                     })
             });
             it('status: 400 returns Bad request when given an invalid order_by value', () => {
-                return request(app)
+                return request
                     .get('/api/articles?order=big')
                     .expect(400)
                     .then(({
@@ -553,8 +585,8 @@ describe('/api', () => {
                         expect(msg).to.equal("Bad request");
                     })
             });
-            it('status: 404 returns Path not found when given a non-existant author query', () => {
-                return request(app)
+            it('status: 404 returns User not found when given a non-existant author query', () => {
+                return request
                     .get('/api/articles?author=humayraa')
                     .expect(404)
                     .then(({
@@ -562,11 +594,11 @@ describe('/api', () => {
                             msg
                         }
                     }) => {
-                        expect(msg).to.equal("Path not found");
+                        expect(msg).to.equal("User not found");
                     })
             });
-            it('status: 404 returns Path not found when given a non-existant topic query', () => {
-                return request(app)
+            it('status: 404 returns Topic not found when given a non-existant topic query', () => {
+                return request
                     .get('/api/articles?topic=mushrooms')
                     .expect(404)
                     .then(({
@@ -574,11 +606,11 @@ describe('/api', () => {
                             msg
                         }
                     }) => {
-                        expect(msg).to.equal("Path not found");
+                        expect(msg).to.equal("Topic not found");
                     })
             });
             it('status: 200 returns an empty array when given a valid author query that results in no articles', () => {
-                return request(app)
+                return request
                     .get('/api/articles?author=lurker')
                     .expect(200)
                     .then(({
@@ -588,7 +620,7 @@ describe('/api', () => {
                     })
             });
             it('status: 200 returns an empty array when given a valid topic query that results in no articles', () => {
-                return request(app)
+                return request
                     .get('/api/articles?topic=paper')
                     .expect(200)
                     .then(({
@@ -602,7 +634,7 @@ describe('/api', () => {
     describe('/comments/:comment_id', () => {
         describe('PATCH', () => {
             it('status: 200 returns an updated comment object when incrementing votes', () => {
-                return request(app)
+                return request
                     .patch('/api/comments/1')
                     .send({
                         inc_votes: 1
@@ -617,7 +649,7 @@ describe('/api', () => {
                     })
             });
             it('status: 200 returns an updated comment object when decrementing votes', () => {
-                return request(app)
+                return request
                     .patch('/api/comments/1')
                     .send({
                         inc_votes: -3
@@ -631,8 +663,8 @@ describe('/api', () => {
                         expect(body.comment.votes).to.equal(13)
                     })
             });
-            it('status: 404 returns Path not found for a non-existant comment_id', () => {
-                return request(app)
+            it('status: 404 returns Comment not found for a non-existent comment_id', () => {
+                return request
                     .patch('/api/comments/923923')
                     .expect(404)
                     .then(({
@@ -640,11 +672,11 @@ describe('/api', () => {
                             msg
                         }
                     }) => {
-                        expect(msg).to.equal("Path not found");
+                        expect(msg).to.equal("Comment not found");
                     })
             });
             it('status: 200 returns the comment object unchanged when an empty object is passed on request body', () => {
-                return request(app)
+                return request
                     .patch('/api/comments/1')
                     .send({})
                     .expect(200)
@@ -656,7 +688,7 @@ describe('/api', () => {
                     })
             });
             it('status: 400 returns Bad request when inc_votes is not passed an integer', () => {
-                return request(app)
+                return request
                     .patch('/api/comments/1')
                     .send({
                         inc_votes: "cats"
@@ -671,7 +703,7 @@ describe('/api', () => {
                     })
             });
             it('status: 400 returns Bad request when given an invalid comment_id', () => {
-                return request(app)
+                return request
                     .patch('/api/comments/one')
                     .send({
                         inc_votes: 1
@@ -686,7 +718,7 @@ describe('/api', () => {
                     })
             });
             it('status: 200 returns a comment object with updated votes and ignores the second property passed to the request body', () => {
-                return request(app)
+                return request
                     .patch('/api/comments/1')
                     .send({
                         inc_votes: 1,
@@ -702,7 +734,7 @@ describe('/api', () => {
             it('status: 405 returns Method not allowed', () => {
                 const invalidMethods = ['post', 'get'];
                 const methodPromises = invalidMethods.map((method) => {
-                    return request(app)[method]('/api/comments/1')
+                    return request[method]('/api/comments/1')
                         .expect(405)
                         .then(({
                             body: {
@@ -717,7 +749,7 @@ describe('/api', () => {
         });
         describe('DELETE', () => {
             it('status: 204 returns no content on response body', () => {
-                return request(app)
+                return request
                     .delete('/api/comments/1')
                     .expect(204)
                     .then(({
@@ -726,8 +758,8 @@ describe('/api', () => {
                         expect(body).to.eql({});
                     })
             });
-            it('status: 404 returns Path not found when given a non-existant comment_id', () => {
-                return request(app)
+            it('status: 404 returns Comment not found when given a non-existent comment_id', () => {
+                return request
                     .delete('/api/comments/25693')
                     .expect(404)
                     .then(({
@@ -735,11 +767,11 @@ describe('/api', () => {
                             msg
                         }
                     }) => {
-                        expect(msg).to.equal("Path not found");
+                        expect(msg).to.equal("Comment not found");
                     })
             });
             it('status: 400 returns Bad request when given an invalid comment_id', () => {
-                return request(app)
+                return request
                     .delete('/api/comments/one')
                     .send({
                         inc_votes: 1
@@ -753,27 +785,11 @@ describe('/api', () => {
                         expect(msg).to.equal("Bad request");
                     })
             });
-            // it('status: 405 returns Method not allowed', () => {
-            //     const invalidMethods = ['post', 'get'];
-            //     const methodPromises = invalidMethods.map((method) => {
-            //         return request(app)[method]('/api/articles/comments/1')
-            //             .expect(405)
-            //             .then(({
-            //                 body: {
-            //                     msg
-            //                 }
-            //             }) => {
-            //                 expect(msg).to.equal("Method not allowed");
-            //             })
-            //     });
-
-            //     return Promise.all(methodPromises);
-            // });
         });
     });
     describe('GET', () => {
         it('returns all the available endpoints as JSON', () => {
-            return request(app)
+            return request
             .get('/api')
             .expect(200)
             .then(({body}) => {

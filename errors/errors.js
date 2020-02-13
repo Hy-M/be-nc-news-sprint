@@ -6,6 +6,13 @@ exports.handle405 = (req, res, next) => {
 }
 
 // error-handling middleware functions
+exports.handle401 = (err, req, res, next) => {
+    if (err.status === 401) {
+        res.status(401).send({ msg: err.msg });
+    }
+    next(err);
+};
+
 exports.handle404 = (err, req, res, next) => {
     if (err.status === 404) {
         res.status(404).send({
