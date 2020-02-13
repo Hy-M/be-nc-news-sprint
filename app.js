@@ -4,6 +4,7 @@ const app = express();
 const apiRouter = require("./routes/api-router.js");
 const { handle401, handle404, handle400, handle500 } = require("./errors/errors");
 const jwt = require("jsonwebtoken");
+const { connection: { JWT_SECRET } } = require("../knexfile");
 
 app.use(express.json())
 app.use(cors())
