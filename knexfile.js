@@ -1,10 +1,11 @@
-const { DB_URL } = process.env;
+const { DB_URL, username, password } = process.env;
+console.log(username, password)
 const ENV = process.env.NODE_ENV || 'development';
 
-const {
-  username,
-  password
-} = require("./db/credentials.js");
+// const {
+//   username,
+//   password
+// } = require("./db/credentials.js");
 
 const baseConfig = {
   client: 'pg',
