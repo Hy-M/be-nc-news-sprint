@@ -21,14 +21,16 @@ const customConfig = {
     connection: {
       database: 'nc_news',
       username: username,
-      password: password
+      password: password,
+      JWT_SECRET: 'secret key'
     }
   },
   test: {
     connection: {
       database: 'nc_news_test',
       username: username,
-      password: password
+      password: password,
+      JWT_SECRET: 'secret key'
     }
   },
   production: {
