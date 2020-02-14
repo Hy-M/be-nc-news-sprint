@@ -1,5 +1,4 @@
 node_modules
 db/credentials.js
 query.sql
-output.txt
 .env
