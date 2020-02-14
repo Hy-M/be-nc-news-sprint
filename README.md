@@ -20,6 +20,12 @@ Install the dependencies:
 npm i
 ```
 
+In the root directory, create a '.env' file and store your psql credentials in this format
+```
+username=yourusername
+password=yourpassword
+```
+
 Set up the development and test databases 
 ```
 npm run setup-dbs
