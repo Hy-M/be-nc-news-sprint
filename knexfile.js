@@ -1,5 +1,4 @@
 const { DB_URL, username, password } = process.env;
-console.log(username, password)
 const ENV = process.env.NODE_ENV || 'development';
 
 // const {
