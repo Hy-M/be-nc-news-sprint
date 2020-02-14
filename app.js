@@ -19,7 +19,7 @@ app.use((req, res, next) => {
     const token = authorization.split(' ')[1];
     jwt.verify(token, JWT_SECRET, (err, res) => {
       if (err) next({ status: 401, msg: 'Unauthorised' });
-      else next();
+      // else next();
     });
 });  
 
