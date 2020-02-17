@@ -20,18 +20,19 @@ Install the dependencies:
 npm i
 ```
 
-In the root directory, create a '.env' file and store your psql credentials in this format
+In the 'db' folder, create a file called credentials.js to store your psql credentials:
+
 ```
-username=yourusername
-password=yourpassword
+exports.username = "yourusername";
+exports.password = "yourpassword";
 ```
 
-Set up the development and test databases 
+Set up the development and test databases :
 ```
 npm run setup-dbs
 ```
 
-Seed the development database
+Seed the development database:
 ```
 npm run seed
 ```
@@ -42,6 +43,48 @@ npm start
 ```
 
 To view all of the available endpoints in JSON format, make a GET /api request. 
+
+## Hosting
+
+If you wish to host this app on Heroku, you will need to change some of the credentials code.
+
+Install dotenv module:
+
+```
+npm i dotenv -D
+
+```
+
+This package will look for a '.env' file in root and store the variables on process.env.
+
+In the root directory, create a '.env' file and store your psql credentials in this format:
+
+```
+username=yourusername
+password=yourpassword
+```
+
+In knexfile.js, on the first line, destructure username and password from process.env along with DB_URL so it looks like this:
+
+```
+const { DB_URL, username, password } = process.env;
+```
+
+You will need to comment out or remove the code that is requiring 'username' and 'password' from db/credentials.js, as it will conflict with your new variables.
+
+In listen.js:
+
+```
+const env = require("dotenv");
+env.config()
+```
+
+Finally, you will need to go to Heroku in the browser.
+
+Select your application -> Settings -> Config Vars -> Reveal Config Vars
+
+Add key value pairs of your psql username and password, then push to Heroku as normal.
+
 
 ## API endpoints
 
