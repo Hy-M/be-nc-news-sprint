@@ -31,7 +31,7 @@ beforeEach(function () {
 after(() => connection.destroy());
 
 describe('/api', () => {
-    describe('login', () => {
+    describe.only('login', () => {
         it('status: 200 responds with an access token when given correct username', () => {
          return request
           .post('/api/login')

@@ -17,7 +17,7 @@ app.use('/*', (req, res, next) => {
 app.use((req, res, next) => {
     const { authorization } = req.headers;
     const token = authorization.split(' ')[1];
-    jwt.verify(token, JWT_SECRET, (err, res) => {
+    jwt.verify(token, JWT_SECRET, (err, res) => {      
       if (err) next({ status: 401, msg: 'Unauthorised' });
       // else next();
     });
