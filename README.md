@@ -6,6 +6,14 @@ This api has many endpoints allowing access to northcoders news.
 
 ## Getting started
 
+These instructions will get you a copy of the project up and running on your local machine.
+
+### Prerequisites
+
+The minimum version of node you will need to run this app is v12.11.1
+
+### Installing
+
 Clone this repo:
 
 ```bash
