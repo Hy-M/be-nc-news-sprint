@@ -28,63 +28,38 @@ exports.password = "yourpassword";
 ```
 
 Set up the development and test databases :
+
 ```
 npm run setup-dbs
 ```
 
 Seed the development database:
+
 ```
 npm run seed
 ```
 
 Run the app. It will run on http://localhost:9090
+
 ```
 npm start
 ```
 
-To view all of the available endpoints in JSON format, make a GET /api request. 
+To view all of the available endpoints in JSON format, make a GET /api request.
 
-## Hosting
+## Testing
 
-If you wish to host this app on Heroku, you will need to change some of the credentials code.
-
-Install dotenv module:
+To run tests on the endpoints, type the following in your terminal:
 
 ```
-npm i dotenv -D
-
+npm test
 ```
 
-This package will look for a '.env' file in root and store the variables on process.env.
-
-In the root directory, create a '.env' file and store your psql credentials in this format:
+To run tests on the util functions:
 
 ```
-username=yourusername
-password=yourpassword
+npm test-utils
 ```
-
-In knexfile.js, on the first line, destructure username and password from process.env along with DB_URL so it looks like this:
-
-```
-const { DB_URL, username, password } = process.env;
-```
-
-You will need to comment out or remove the code that is requiring 'username' and 'password' from db/credentials.js, as it will conflict with your new variables.
-
-In listen.js:
-
-```
-const env = require("dotenv");
-env.config()
-```
-
-Finally, you will need to go to Heroku in the browser.
-
-Select your application -> Settings -> Config Vars -> Reveal Config Vars
-
-Add key value pairs of your psql username and password, then push to Heroku as normal.
-
 
 ## API endpoints
 
@@ -109,8 +84,7 @@ DELETE /api/comments/:comment_id
 GET /api
 ```
 
-More specifically, each endpoint responds like this: 
----
+## More specifically, each endpoint responds like this:
 
 ```http
 GET /api/topics
@@ -273,24 +247,31 @@ DELETE /api/comments/:comment_id
 - status 204 and no content
 
 ---
+
 ```http
 GET /api
 ```
 
 #### Responds with
+
 - JSON describing all the available endpoints
+
 ---
 
 ## Built using
 
-* Node.js
-* Express.js
-* PostgreSQL
-* Node postgres
-* Knex.js
-* Mocha
-* Chai
-* Chai-sorted
-* Supertest
+- Node.js
+- Express.js
+- PostgreSQL
+- Node postgres
+- Knex.js
+- Mocha
+- Chai
+- Chai-sorted
+- Supertest
 
 ---
+
+## Author
+
+[Humayraa Mulla](https://github.com/Hy-M)
